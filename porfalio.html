@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portafolio - Empresa X</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+        header {
+            background: #333;
+            color: white;
+            padding: 20px;
+            font-size: 24px;
+        }
+        .portafolio {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            padding: 20px;
+        }
+        .proyecto {
+            background: white;
+            margin: 15px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 250px;
+        }
+        .proyecto img {
+            width: 100%;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>Portafolio de Empresa X</header>
+    <div class="portafolio" id="portafolio"></div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const proyectos = [
+                { nombre: "Proyecto A", imagen: "https://via.placeholder.com/200" },
+                { nombre: "Proyecto B", imagen: "https://via.placeholder.com/200" },
+                { nombre: "Proyecto C", imagen: "https://via.placeholder.com/200" }
+            ];
+
+            const portafolioDiv = document.getElementById("portafolio");
+            proyectos.forEach(proyecto => {
+                const div = document.createElement("div");
+                div.classList.add("proyecto");
+                div.innerHTML = `<img src="${proyecto.imagen}" alt="${proyecto.nombre}"><h3>${proyecto.nombre}</h3>`;
+                portafolioDiv.appendChild(div);
+            });
+        });
+    </script>
+    <script src="bot.js"></script>
+</body>
+
+</html>
