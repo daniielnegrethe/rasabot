@@ -1,4 +1,8 @@
 (function() {
+    // Configuración - MODIFICA ESTA URL con la dirección de tu servidor Rasa
+    const RASA_SERVER_URL = 'http://localhost:5005/webhooks/rest/webhook';
+    const SENDER_ID = 'usuario_' + Math.random().toString(36).substring(7);
+
     // Estilos en tiempo real
     const style = document.createElement('style');
     style.textContent = `
@@ -6,32 +10,34 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            width: 350px;
-            background-color: rgb(198, 185, 185);
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            width: 280px;
+            background-color: white;
+            border-radius: 8px;
+            border: 1px solid #0066cc;
             overflow: hidden;
             transition: all 0.3s ease;
             z-index: 9999;
             font-family: Arial, sans-serif;
+            font-size: 14px;
         }
         .chat-header {
             background-color: #0066cc;
             color: white;
-            padding: 10px;
+            padding: 8px 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
+            font-size: 13px;
         }
         .chat-header-content {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
         .chat-logo {
-            width: 30px;
-            height: 30px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             object-fit: cover;
         }
@@ -48,21 +54,25 @@
             overflow: hidden;
         }
         .chat-body.open {
-            height: 450px;
+            height: 350px;
             opacity: 1;
         }
         .messages {
-            height: 350px;
+            height: 280px;
             overflow-y: auto;
             padding: 10px;
-            background-color: #f9f9f9;
+            background-color: white;
+            border-left: 1px solid #e6e6e6;
+            border-right: 1px solid #e6e6e6;
         }
         .message {
-            margin-bottom: 10px;
-            padding: 10px;
-            border-radius: 8px;
-            max-width: 80%;
+            margin-bottom: 8px;
+            padding: 8px;
+            border-radius: 6px;
+            max-width: 85%;
             clear: both;
+            font-size: 13px;
+            line-height: 1.4;
         }
         .user-message {
             background-color: #e6f2ff;
@@ -77,33 +87,36 @@
         }
         .input-area {
             display: flex;
-            padding: 10px;
-            border-top: 1px solid #eee;
+            padding: 8px;
+            border-top: 1px solid #e6e6e6;
             background-color: white;
         }
         .input-area input {
             flex-grow: 1;
-            padding: 10px;
+            padding: 6px 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            margin-right: 10px;
+            margin-right: 6px;
+            font-size: 13px;
         }
         .input-area button {
             background-color: #0066cc;
             color: white;
             border: none;
-            padding: 10px 15px;
+            padding: 6px 12px;
             border-radius: 4px;
             cursor: pointer;
             transition: background-color 0.3s;
+            font-size: 13px;
         }
         .input-area button:hover {
             background-color: #0052a3;
         }
         .loading {
             text-align: center;
-            padding: 10px;
+            padding: 8px;
             color: #666;
+            font-size: 12px;
         }
     `;
     document.head.appendChild(style);
@@ -136,9 +149,7 @@
     `;
     document.body.appendChild(container);
 
-    const RASA_SERVER_URL = 'http://localhost:5005/webhooks/rest/webhook';
-    const SENDER_ID = 'usuario_' + Math.random().toString(36).substring(7);
-
+    // Obtener referencias a los elementos
     const chatHeader = document.getElementById('chat-header');
     const chatToggle = document.getElementById('chat-toggle');
     const chatBody = document.getElementById('chat-body');
@@ -146,30 +157,36 @@
     const messages = document.getElementById('messages');
     const sendButton = document.getElementById('send-button');
 
+    // Función para alternar la visibilidad del chat
     chatHeader.addEventListener('click', () => {
         chatBody.classList.toggle('open');
         chatToggle.textContent = chatBody.classList.contains('open') ? '▲' : '▼';
     });
 
+    // Eventos para enviar mensajes
     sendButton.addEventListener('click', sendMessage);
     input.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendMessage();
     });
 
+    // Función para enviar mensaje al servidor Rasa
     function sendMessage() {
         if (input.value.trim() === '') return;
 
+        // Añadir mensaje del usuario
         const userMessageEl = document.createElement('div');
         userMessageEl.classList.add('message', 'user-message');
         userMessageEl.textContent = input.value;
         messages.appendChild(userMessageEl);
 
+        // Mostrar indicador de carga
         const loadingEl = document.createElement('div');
         loadingEl.classList.add('message', 'bot-message', 'loading');
         loadingEl.textContent = 'Escribiendo...';
         messages.appendChild(loadingEl);
         messages.scrollTop = messages.scrollHeight;
 
+        // Enviar solicitud al servidor Rasa
         fetch(RASA_SERVER_URL, {
             method: 'POST',
             headers: {
@@ -182,7 +199,10 @@
         })
         .then(response => response.json())
         .then(data => {
+            // Eliminar indicador de carga
             messages.removeChild(loadingEl);
+            
+            // Procesar respuestas
             if (data.length === 0) {
                 const fallback = document.createElement('div');
                 fallback.classList.add('message', 'bot-message');
@@ -199,14 +219,19 @@
             messages.scrollTop = messages.scrollHeight;
         })
         .catch(error => {
-            messages.removeChild(loadingEl);
+            // Manejar errores de conexión
+            if (loadingEl.parentNode) {
+                messages.removeChild(loadingEl);
+            }
+            
             const errorMessage = document.createElement('div');
             errorMessage.classList.add('message', 'bot-message');
             errorMessage.textContent = 'Hubo un error al conectar con el asistente. Por favor, inténtalo de nuevo.';
             messages.appendChild(errorMessage);
-            console.error('Chatbot error:', error);
+            console.error('Error de conexión con el chatbot:', error);
         });
 
+        // Limpiar input
         input.value = '';
     }
 })();
