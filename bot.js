@@ -1,6 +1,6 @@
 (function() {
     // Configuración - MODIFICA ESTA URL con la dirección de tu servidor Rasa
-    const RASA_SERVER_URL = 'http://localhost:5005/webhooks/rest/webhook';
+    const RASA_SERVER_URL = 'http://74.208.108.220:5005/webhooks/rest/webhook';
     const SENDER_ID = 'usuario_' + Math.random().toString(36).substring(7);
 
     // Estilos en tiempo real
